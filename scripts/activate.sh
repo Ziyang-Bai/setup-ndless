@@ -11,7 +11,7 @@ if [[ ! -f "$marker" ]] || [[ "$(cat "$marker")" != "$revision" ]]; then
   echo "Ndless installation is incomplete or belongs to another revision." >&2
   exit 1
 fi
-for directory in "$toolchain_bin" "$sdk/bin" "$sdk/tools/zehn"; do
+for directory in "$toolchain_bin" "$sdk/bin"; do
   if [[ ! -d "$directory" ]]; then
     echo "Required Ndless path is missing: $directory" >&2
     exit 1
@@ -26,12 +26,12 @@ fi
   echo "NDLESS_HOME=$sdk"
   echo "NDLESS_SDK=$sdk"
 } >> "$GITHUB_ENV"
-printf '%s\n' "$toolchain_bin" "$sdk/bin" "$sdk/tools/zehn" >> "$GITHUB_PATH"
+printf '%s\n' "$toolchain_bin" "$sdk/bin" >> "$GITHUB_PATH"
 echo "ndless-home=$sdk" >> "$GITHUB_OUTPUT"
 
 export NDLESS_HOME="$sdk"
 export NDLESS_SDK="$sdk"
-export PATH="$toolchain_bin:$sdk/bin:$sdk/tools/zehn:$PATH"
+export PATH="$toolchain_bin:$sdk/bin:$PATH"
 
 arm-none-eabi-gcc --version | sed -n '1p'
 nspire-gcc --version | sed -n '1p'

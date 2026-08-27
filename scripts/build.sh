@@ -103,7 +103,7 @@ if ! (
   )
 fi
 
-export PATH="$toolchain/install/bin:$sdk/bin:$sdk/tools/zehn:$PATH"
+export PATH="$toolchain/install/bin:$sdk/bin:$PATH"
 
 echo "Building Ndless SDK libraries and tools."
 if ! make -C "$sdk" -j"$jobs"; then

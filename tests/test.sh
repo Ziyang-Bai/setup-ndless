@@ -34,12 +34,11 @@ if GITHUB_OUTPUT="$output" RUNNER_TOOL_CACHE="$cache" INPUT_NDLESS_REF='../inval
 fi
 
 sdk="$install_dir/ndless-sdk"
-mkdir -p "$sdk/toolchain/install/bin" "$sdk/bin" "$sdk/tools/zehn"
+mkdir -p "$sdk/toolchain/install/bin" "$sdk/bin"
 printf '%s\n' "$revision" > "$install_dir/.setup-ndless-complete"
 for tool in arm-none-eabi-gcc nspire-gcc genzehn make-prg; do
   case "$tool" in
     arm-none-eabi-gcc) directory="$sdk/toolchain/install/bin" ;;
-    genzehn) directory="$sdk/tools/zehn" ;;
     *) directory="$sdk/bin" ;;
   esac
   printf '#!/usr/bin/env bash\nprintf "%%s\\n" "%s test fake"\n' "$tool" > "$directory/$tool"
@@ -60,7 +59,6 @@ grep -Fx "NDLESS_SDK=$sdk" "$environment_file"
 grep -Fx "ndless-home=$sdk" "$activation_output"
 grep -Fx "$sdk/toolchain/install/bin" "$path_file"
 grep -Fx "$sdk/bin" "$path_file"
-grep -Fx "$sdk/tools/zehn" "$path_file"
 
 if INSTALL_DIR="$install_dir" NDLESS_REVISION="$revision" INPUT_JOBS=invalid \
     scripts/build.sh >/dev/null 2>&1; then

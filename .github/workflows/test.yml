@@ -27,8 +27,6 @@ jobs:
       - name: Set up Ndless
         id: ndless
         uses: ./
-        with:
-          jobs: 2
 
       - name: Verify installed tools and sample
         env:
