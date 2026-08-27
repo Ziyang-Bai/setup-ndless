@@ -48,7 +48,7 @@ runs:
     - name: Restore Ndless installation
       id: cache
       if: ${{ inputs.cache == 'true' }}
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: ${{ steps.metadata.outputs.install-dir }}
         key: setup-ndless-${{ runner.os }}-${{ runner.arch }}-${{ steps.metadata.outputs.revision }}-v1

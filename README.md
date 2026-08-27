@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up Ndless
         uses: Ziyang-Bai/setup-ndless@v1
@@ -77,6 +77,8 @@ The first uncached build commonly takes 15–40 minutes. Subsequent runs using t
 - GitHub-hosted Ubuntu runners
 - Debian/Ubuntu self-hosted Linux runners
 - Fedora self-hosted Linux runners
+
+Self-hosted runners must use GitHub Actions Runner 2.327.1 or newer because the action uses `actions/cache@v6`.
 
 Windows and macOS runners are not supported directly. Windows projects should run the action on a Linux job rather than inside the Windows runner's WSL installation.
 
