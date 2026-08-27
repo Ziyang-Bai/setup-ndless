@@ -1,0 +1,45 @@
+name: Test action
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scripts:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test setup scripts
+        run: tests/test.sh
+
+  setup:
+    needs: scripts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Ndless
+        id: ndless
+        uses: ./
+        with:
+          jobs: 2
+
+      - name: Verify installed tools and sample
+        env:
+          NDLESS_OUTPUT: ${{ steps.ndless.outputs.ndless-home }}
+          NDLESS_REVISION: ${{ steps.ndless.outputs.ndless-revision }}
+        run: |
+          test "$NDLESS_HOME" = "$NDLESS_SDK"
+          test "$NDLESS_HOME" = "$NDLESS_OUTPUT"
+          [[ "$NDLESS_REVISION" =~ ^[0-9a-f]{40}$ ]]
+          command -v arm-none-eabi-gcc
+          command -v nspire-gcc
+          command -v genzehn
+          command -v make-prg
+          test -f "$NDLESS_HOME/samples/helloworld-cpp/helloworld-cpp.tns"

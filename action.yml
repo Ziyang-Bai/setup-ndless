@@ -1,0 +1,76 @@
+name: Setup Ndless
+description: Install and cache the Ndless SDK and ARM toolchain on Linux GitHub runners
+author: Ziyang-Bai
+
+branding:
+  icon: cpu
+  color: blue
+
+inputs:
+  ndless-ref:
+    description: Ndless branch, tag, or full commit SHA to install
+    required: false
+    default: master
+  install-dependencies:
+    description: Install Debian/Ubuntu build dependencies with apt
+    required: false
+    default: "true"
+  cache:
+    description: Cache the completed Ndless installation by resolved commit
+    required: false
+    default: "true"
+  jobs:
+    description: Parallel build jobs; 0 uses all available processors
+    required: false
+    default: "0"
+
+outputs:
+  ndless-home:
+    description: Absolute path to the installed ndless-sdk directory
+    value: ${{ steps.activate.outputs.ndless-home }}
+  ndless-revision:
+    description: Full Ndless commit SHA that was installed
+    value: ${{ steps.metadata.outputs.revision }}
+  cache-hit:
+    description: Whether the installation was restored from the GitHub Actions cache
+    value: ${{ steps.cache.outputs.cache-hit }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve Ndless revision
+      id: metadata
+      shell: bash
+      env:
+        INPUT_NDLESS_REF: ${{ inputs.ndless-ref }}
+      run: "$GITHUB_ACTION_PATH/scripts/resolve.sh"
+
+    - name: Restore Ndless installation
+      id: cache
+      if: ${{ inputs.cache == 'true' }}
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.metadata.outputs.install-dir }}
+        key: setup-ndless-${{ runner.os }}-${{ runner.arch }}-${{ steps.metadata.outputs.revision }}-v1
+
+    - name: Install build dependencies
+      if: ${{ inputs.install-dependencies == 'true' }}
+      shell: bash
+      run: "$GITHUB_ACTION_PATH/scripts/install-dependencies.sh"
+
+    - name: Build Ndless SDK
+      if: ${{ inputs.cache != 'true' || steps.cache.outputs.cache-hit != 'true' }}
+      shell: bash
+      env:
+        INSTALL_DIR: ${{ steps.metadata.outputs.install-dir }}
+        NDLESS_REVISION: ${{ steps.metadata.outputs.revision }}
+        INPUT_JOBS: ${{ inputs.jobs }}
+      run: "$GITHUB_ACTION_PATH/scripts/build.sh"
+
+    - name: Activate Ndless SDK
+      id: activate
+      shell: bash
+      env:
+        INSTALL_DIR: ${{ steps.metadata.outputs.install-dir }}
+        NDLESS_REVISION: ${{ steps.metadata.outputs.revision }}
+      run: "$GITHUB_ACTION_PATH/scripts/activate.sh"
