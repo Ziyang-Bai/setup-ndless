@@ -17,6 +17,20 @@ if [[ -z "${GITHUB_OUTPUT:-}" ]]; then
   exit 1
 fi
 
+ls_remote_retry() {
+  local attempt
+  for attempt in 1 2 3 4; do
+    if git ls-remote "$@"; then
+      return 0
+    fi
+    if [[ "$attempt" != 4 ]]; then
+      echo "Ndless revision lookup failed (attempt $attempt/4); retrying." >&2
+      sleep $((attempt * 5))
+    fi
+  done
+  return 1
+}
+
 revision=""
 if [[ "$ref" =~ ^[0-9a-fA-F]{40}$ ]]; then
   revision="${ref,,}"
@@ -30,7 +44,7 @@ else
       "refs/tags/$ref") tag_revision="$candidate" ;;
       "refs/tags/$ref^{}") peeled_revision="$candidate" ;;
     esac
-  done < <(git ls-remote "$repository" "refs/heads/$ref" "refs/tags/$ref" "refs/tags/$ref^{}")
+  done < <(ls_remote_retry "$repository" "refs/heads/$ref" "refs/tags/$ref" "refs/tags/$ref^{}")
   revision="${branch_revision:-${peeled_revision:-$tag_revision}}"
 fi
 
