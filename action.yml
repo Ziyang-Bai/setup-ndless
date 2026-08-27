@@ -48,7 +48,7 @@ runs:
     - name: Restore Ndless installation
       id: cache
       if: ${{ inputs.cache == 'true' }}
-      uses: actions/cache@v6
+      uses: actions/cache/restore@v6
       with:
         path: ${{ steps.metadata.outputs.install-dir }}
         key: setup-ndless-${{ runner.os }}-${{ runner.arch }}-${{ steps.metadata.outputs.revision }}-v1
@@ -74,3 +74,10 @@ runs:
         INSTALL_DIR: ${{ steps.metadata.outputs.install-dir }}
         NDLESS_REVISION: ${{ steps.metadata.outputs.revision }}
       run: "$GITHUB_ACTION_PATH/scripts/activate.sh"
+
+    - name: Save Ndless installation
+      if: ${{ inputs.cache == 'true' && steps.cache.outputs.cache-hit != 'true' }}
+      uses: actions/cache/save@v6
+      with:
+        path: ${{ steps.metadata.outputs.install-dir }}
+        key: setup-ndless-${{ runner.os }}-${{ runner.arch }}-${{ steps.metadata.outputs.revision }}-v1
